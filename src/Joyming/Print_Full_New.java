@@ -1,4 +1,4 @@
-package six;
+package Joyming;
 
 
 import javax.imageio.ImageIO;
