@@ -14,11 +14,13 @@ import java.text.SimpleDateFormat;
 public class Main_UI extends JFrame {
     private JPanel jPanelNorth;
     private JPanel jPanelCenter;
+    private JPanel jPanelBottom;
 
     private JPanel jPaneln1;
     private JPanel jPaneln2;
     private JPanel jPanelc1;
     private JPanel jPanelc2;
+    private JPanel jPanelb1;
     static PrinterJob printerJob = PrinterJob.getPrinterJob();
 
     private JScrollPane jScrollPane;
@@ -31,7 +33,6 @@ public class Main_UI extends JFrame {
 
     private JButton printHalf;
 
-
     private JButton printFour;
 
     private JButton clearAll;
@@ -40,7 +41,11 @@ public class Main_UI extends JFrame {
     private JButton cancelfileWatcher;
     private JTextArea tips;
 
+    private JLabel mAuthor;
+
     private FileWatcher fileWatcher;
+
+    private Print_Full_New printer;
 
 
     public static void main(String[] args) {
@@ -57,6 +62,7 @@ public class Main_UI extends JFrame {
         {
             jPanelNorth = new JPanel();
             jPanelCenter = new JPanel();
+            jPanelBottom = new JPanel();
 
 //            jPanelSouth = new JPanel();
             jPaneln1 = new JPanel();
@@ -64,6 +70,7 @@ public class Main_UI extends JFrame {
 
             jPanelc2 = new JPanel();
             jPaneln2 = new JPanel();
+            jPanelb1 = new JPanel();
 
             jScrollPane = new JScrollPane();
         }
@@ -98,11 +105,10 @@ public class Main_UI extends JFrame {
         }
         {
             tips = new JTextArea(16, 45);
-            tips.setText("--------------说明----------------\n" +
-                    "---------------joymingchen@foxmail.com----------------\n" +
-                    "1.选定文件夹，选择你想要的打印方式打印即可；\n" +
+            tips.setText("--------------说明----------------\n\n" +
+                    "1.选定文件夹执行监听即可；\n" +
                     "\n" +
-                    "2.一张图片打印成一页：适合打印大小占满一页的图片或pdf；\n" +
+                    "2.一张图片打印成一页\n" +
                     "\n" +
 //                    "3.两张图片打印成一页：适合打印发票那样大小的图片或pdf；\n" +
 //                    "\n" +
@@ -119,25 +125,37 @@ public class Main_UI extends JFrame {
             jScrollPane = new JScrollPane(tips);
 //            jPanelSouth.add(clearAll);
             jPanelc2.add(jScrollPane);
+
+            mAuthor = new JLabel();
+            mAuthor.setText("joymingchen@foxmail.com");
+
+            jPanelb1.add(mAuthor);
         }
         {
             this.setLayout(new BorderLayout());
             this.add(jPanelNorth, BorderLayout.NORTH);
             this.add(jPanelCenter, BorderLayout.CENTER);
+            this.add(jPanelBottom, BorderLayout.SOUTH);
 
             jPanelCenter.setLayout(new BorderLayout());
-            jPanelCenter.add(jPaneln1, BorderLayout.NORTH);
+//            jPanelCenter.add(jPaneln1, BorderLayout.NORTH);
             jPanelCenter.add(jPanelc1, BorderLayout.CENTER);
 
             jPanelc1.setLayout(new BorderLayout());
             jPanelc1.add(jPaneln2, BorderLayout.NORTH);
             jPanelc1.add(jPanelc2, BorderLayout.CENTER);
 
+            jPanelBottom.setLayout(new BorderLayout());
+            jPanelBottom.add(jPanelb1, BorderLayout.CENTER);
+
+//            jPanelb1.setLayout(new BorderLayout());
+//            jPanelb1.add(jPanelb1, BorderLayout.SOUTH);
+
 //            this.add(jPanelCenter, BorderLayout.SOUTH);
             this.setVisible(true);
 //            this.setContentPane(jPanel);
 //            this.add(jPanel);
-            this.setSize(560, 460);
+            this.setSize(560, 420);
             // 屏幕居中
             int windowWidth = this.getWidth(); // 获得窗口宽
             int windowHeight = this.getHeight(); // 获得窗口高
@@ -197,7 +215,7 @@ public class Main_UI extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
 //                    boolean a = printerJob.printDialog();
-                    if(true){
+                    if (true) {
                         new Print_Full_New().doPrintfJob(fileText.getText());
                     }
 
@@ -223,6 +241,24 @@ public class Main_UI extends JFrame {
                 fileWatcher.setPath(fileText.getText());
                 //开启监听
                 fileWatcher.startWatcher();
+
+                //有新文件进入时的回调
+                fileWatcher.setOnWatchFileListener(new FileWatcher.OnWatchFileListener() {
+                    @Override
+                    public void setOnWatchFileListener(boolean isWatching, String filePath,String fileName) {
+                        if(isWatching){
+                            //执行打印
+                            try {
+                                if(printer == null){
+                                    printer = new Print_Full_New();
+                                }
+                                printer.printf(filePath);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
             }
         });
 

@@ -51,7 +51,7 @@ public class Print_Full_New {
                     System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：").format(System.currentTimeMillis()) + "一张为1页：第" + i + "页开始打印");
                     try {
                         path1 = aStack.pop().toString();
-                        printf();
+                        printf(path1);
                     } finally {
                         path1 = "";
                     }
@@ -65,7 +65,7 @@ public class Print_Full_New {
     }
 
 
-    public void printf() {
+    public void printf(String path) {
 
         //获取选择的文件
 //        File file = new File("C:\\Users\\Joy Chen\\Desktop\\test\\DSC_2820.JPG");
@@ -107,9 +107,15 @@ public class Print_Full_New {
                 MediaPrintableArea area = new MediaPrintableArea(1f, 10f, 210, 148 + 40, MediaPrintableArea.MM);
                 das.add(area);
 
-                Doc doc = new SimpleDoc(getinputstream(), flavor, das);
+                ByteArrayInputStream inputStream = getinputstream(path);
+                Doc doc = new SimpleDoc(inputStream, flavor, das);
                 job.print(doc, pras);
-                getinputstream().close();
+
+                inputStream.close();
+
+                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                        .format(System.currentTimeMillis()) + path + "\n打印结束咯\n");
+
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
@@ -122,7 +128,7 @@ public class Print_Full_New {
     }
 
 
-    public static ByteArrayInputStream getinputstream() throws Exception {
+    public static ByteArrayInputStream getinputstream(String pathFileName) throws Exception {
 
         float scale = 1f;
         float a5Width = 210 * scale;
@@ -142,7 +148,7 @@ public class Print_Full_New {
         g.setColor(new Color(255, 255, 255));
         g.fillRect(0, 0, width, height);
 
-        g.translate(0,0);
+        g.translate(0, 0);
         // 设定字体
         g.setColor(Color.RED);
         //旋转字体
@@ -158,7 +164,7 @@ public class Print_Full_New {
         int fontWidth = fm.stringWidth(first);
         int fontHeight = fm.getHeight();
         float fontX = width - fontHeight;
-        float fontY = (height + fontWidth)/2;
+        float fontY = (height + fontWidth) / 2;
 //        g.drawString(first, fontHeight + 100, fontX);
         g.drawString(first, fontX, fontY);
 
@@ -175,12 +181,12 @@ public class Print_Full_New {
 
 
         //画照片
-        BufferedImage image = read(new File(path1));
+        BufferedImage image = read(new File(pathFileName));
 //        g.rotate(Math.toRadians(180), width / 2, height / 2);
 
         float x = fontX2 - fontHeight2;
         //画图
-        g.drawImage(image, 0, 0, (int)x, height , null);
+        g.drawImage(image, 0, 0, (int) x, height, null);
 
 
         // 图象生效
