@@ -21,6 +21,7 @@ public class Main_UI extends JFrame {
     private JPanel jPanelc1;
     private JPanel jPanelc2;
     private JPanel jPanelb1;
+
     static PrinterJob printerJob = PrinterJob.getPrinterJob();
 
     private JScrollPane jScrollPane;
@@ -30,6 +31,9 @@ public class Main_UI extends JFrame {
     private JTextField fileText;
     private JButton selectFile;
     private JButton printFull;
+
+    private JLabel contentLabel;
+    private JTextField contentText;
 
     private JButton printHalf;
 
@@ -88,14 +92,17 @@ public class Main_UI extends JFrame {
             printHalf = new JButton("两张图片打印成一页");
             printFour = new JButton("四张图片打印成一页");
 
-            jPaneln1.add(printFull);
-            jPaneln1.add(printHalf);
-            jPaneln1.add(printFour);
+            contentLabel = new JLabel("自定义文本内容：");
+            contentText = new JTextField("终南山寨峡谷运动乐园留念", 25);
+
+            jPaneln1.add(contentLabel);
+            jPaneln1.add(contentText);
+//            jPaneln1.add(printFour);
 
         }
         {
             clearAll = new JButton("清空记录");
-            test = new JButton("Test");
+            test = new JButton("手动执行打印");
             fileWatcherBtn = new JButton("文件夹监听");
             cancelfileWatcher = new JButton("取消监听");
             jPaneln2.add(clearAll);
@@ -109,7 +116,11 @@ public class Main_UI extends JFrame {
                     "1.选定文件夹执行监听即可；\n" +
                     "\n" +
                     "2.一张图片打印成一页\n" +
+                    "--------------------------------\n" +
                     "\n" +
+                    "手动执行打印：打印文件夹下所有的照片\n" +
+                    "\n" +
+                    "文件夹监听：当文件夹下有新照片进入时，自动执行打印\n" +
 //                    "3.两张图片打印成一页：适合打印发票那样大小的图片或pdf；\n" +
 //                    "\n" +
 //                    "4.四张图片打印成一页：适合打印手机截图那样大小的图片或pdf；\n" +
@@ -137,8 +148,9 @@ public class Main_UI extends JFrame {
             this.add(jPanelCenter, BorderLayout.CENTER);
             this.add(jPanelBottom, BorderLayout.SOUTH);
 
+
             jPanelCenter.setLayout(new BorderLayout());
-//            jPanelCenter.add(jPaneln1, BorderLayout.NORTH);
+            jPanelCenter.add(jPaneln1, BorderLayout.NORTH);
             jPanelCenter.add(jPanelc1, BorderLayout.CENTER);
 
             jPanelc1.setLayout(new BorderLayout());
@@ -214,13 +226,20 @@ public class Main_UI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 try {
-//                    boolean a = printerJob.printDialog();
-                    if (true) {
-                        new Print_Full_New().doPrintfJob(fileText.getText());
+                    boolean a = printerJob.printDialog();
+                    if (a) {
+
+                        if (printer == null) {
+                            printer = new Print_Full_New();
+                        }
+                        printer.setContent(contentText.getText());
+                        printer.doPrintfJob(fileText.getText());
                     }
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
+                    System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                            .format(System.currentTimeMillis()) + "！！！" + e.getMessage());
                 }
             }
         });
@@ -245,16 +264,19 @@ public class Main_UI extends JFrame {
                 //有新文件进入时的回调
                 fileWatcher.setOnWatchFileListener(new FileWatcher.OnWatchFileListener() {
                     @Override
-                    public void setOnWatchFileListener(boolean isWatching, String filePath,String fileName) {
-                        if(isWatching){
+                    public void setOnWatchFileListener(boolean isWatching, String filePath, String fileName) {
+                        if (isWatching) {
                             //执行打印
                             try {
-                                if(printer == null){
+                                if (printer == null) {
                                     printer = new Print_Full_New();
                                 }
+                                printer.setContent(contentText.getText());
                                 printer.printf(filePath);
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                                        .format(System.currentTimeMillis()) + "！！！" + e.getMessage());
                             }
                         }
                     }

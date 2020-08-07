@@ -31,6 +31,11 @@ public class Print_Full_New {
 
     private String time;
 
+    /**
+     * 自定义文字内容
+     */
+    private String content = "";
+
     public Print_Full_New() {
         long timeMillis = System.currentTimeMillis();
         time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：").format(timeMillis);
@@ -128,7 +133,7 @@ public class Print_Full_New {
     }
 
 
-    public static ByteArrayInputStream getinputstream(String pathFileName) throws Exception {
+    public ByteArrayInputStream getinputstream(String pathFileName) throws Exception {
 
         float scale = 1f;
         float a5Width = 210 * scale;
@@ -159,7 +164,7 @@ public class Print_Full_New {
         g.setFont(rotatedFont);
 
         //第一行文字
-        String first = "终南山寨峡谷运动乐园留念";
+        String first = content;
         FontMetrics fm = g.getFontMetrics(font);
         int fontWidth = fm.stringWidth(first);
         int fontHeight = fm.getHeight();
@@ -200,7 +205,13 @@ public class Print_Full_New {
         return input;
     }
 
+    public String getContent() {
+        return content;
+    }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
 }
 
 
