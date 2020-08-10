@@ -25,7 +25,7 @@ public class Main_UI extends JFrame {
     static PrinterJob printerJob = PrinterJob.getPrinterJob();
 
     private JScrollPane jScrollPane;
-    private static String filePath = ".\\";
+    private static String filePath = "C:\\Users\\Joy Chen\\Desktop\\test";
 
     private JLabel fullLabel;
     private JTextField fileText;

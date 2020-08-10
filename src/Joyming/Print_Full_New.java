@@ -112,11 +112,10 @@ public class Print_Full_New {
                 MediaPrintableArea area = new MediaPrintableArea(1f, 10f, 210, 148 + 40, MediaPrintableArea.MM);
                 das.add(area);
 
-                ByteArrayInputStream inputStream = getinputstream(path);
-                Doc doc = new SimpleDoc(inputStream, flavor, das);
+                Doc doc = new SimpleDoc(getinputstream(path), flavor, das);
                 job.print(doc, pras);
 
-                inputStream.close();
+                getinputstream(path).close();
 
                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
                         .format(System.currentTimeMillis()) + path + "\n打印结束咯\n");
@@ -140,7 +139,7 @@ public class Print_Full_New {
         float a5Height = 148 * scale;
 
         // 在内存中创建图象
-        int width = (int) (a5Width * 18), height = (int) (a5Height * 18);
+        int width = (int) (a5Width * 18), height = (int) (a5Height * 16);
 
 
         BufferedImage src = new BufferedImage(width, height,
@@ -154,6 +153,8 @@ public class Print_Full_New {
         g.fillRect(0, 0, width, height);
 
         g.translate(0, 0);
+
+
         // 设定字体
         g.setColor(Color.RED);
         //旋转字体
@@ -164,7 +165,7 @@ public class Print_Full_New {
         g.setFont(rotatedFont);
 
         //第一行文字
-        String first = content;
+        String first = new SimpleDateFormat("yyyy.MM.dd   HH:mm").format(System.currentTimeMillis());
         FontMetrics fm = g.getFontMetrics(font);
         int fontWidth = fm.stringWidth(first);
         int fontHeight = fm.getHeight();
@@ -176,14 +177,13 @@ public class Print_Full_New {
         //第二行文字
         //间距
         int paddingTop = 20;
-        String second = new SimpleDateFormat("yyyy.MM.dd   HH:mm").format(System.currentTimeMillis());
+        String second = content;
         FontMetrics fm2 = g.getFontMetrics(font);
         int fontWidth2 = fm2.stringWidth(second);
         int fontHeight2 = fm2.getHeight();
         float fontX2 = width - fontHeight - paddingTop - fontHeight2;
         float fontY2 = (height + fontWidth2) / 2;
         g.drawString(second, fontX2, fontY2);
-
 
         //画照片
         BufferedImage image = read(new File(pathFileName));
@@ -192,6 +192,10 @@ public class Print_Full_New {
         float x = fontX2 - fontHeight2;
         //画图
         g.drawImage(image, 0, 0, (int) x, height, null);
+
+        g.drawString(first, fontX, fontY);
+
+        g.drawString(second, fontX2, fontY2);
 
 
         // 图象生效
