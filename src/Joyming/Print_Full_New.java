@@ -2,6 +2,8 @@ package Joyming;
 
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.print.*;
 import javax.print.attribute.DocAttributeSet;
@@ -15,8 +17,10 @@ import javax.print.attribute.standard.PrintQuality;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 import java.util.Stack;
 
 import static javax.imageio.ImageIO.read;
@@ -112,10 +116,14 @@ public class Print_Full_New {
                 MediaPrintableArea area = new MediaPrintableArea(1f, 10f, 210, 148 + 40, MediaPrintableArea.MM);
                 das.add(area);
 
+//                ByteArrayInputStream inputStream = getinputstream(path);
+                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                        .format(System.currentTimeMillis()) + path + "\n开始打印咯\n");
+
                 Doc doc = new SimpleDoc(getinputstream(path), flavor, das);
                 job.print(doc, pras);
 
-                getinputstream(path).close();
+//                inputStream.close();
 
                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
                         .format(System.currentTimeMillis()) + path + "\n打印结束咯\n");

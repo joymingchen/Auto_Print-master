@@ -167,7 +167,7 @@ public class Main_UI extends JFrame {
             this.setVisible(true);
 //            this.setContentPane(jPanel);
 //            this.add(jPanel);
-            this.setSize(560, 420);
+            this.setSize(560, 520);
             // 屏幕居中
             int windowWidth = this.getWidth(); // 获得窗口宽
             int windowHeight = this.getHeight(); // 获得窗口高
@@ -264,15 +264,19 @@ public class Main_UI extends JFrame {
                 //有新文件进入时的回调
                 fileWatcher.setOnWatchFileListener(new FileWatcher.OnWatchFileListener() {
                     @Override
-                    public void setOnWatchFileListener(boolean isWatching, String filePath, String fileName) {
+                    public void setOnWatchFileListener(boolean isWatching, final String filePath, String fileName) {
                         if (isWatching) {
+
                             //执行打印
                             try {
-                                if (printer == null) {
-                                    printer = new Print_Full_New();
-                                }
-                                printer.setContent(contentText.getText());
-                                printer.printf(filePath);
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        printer = new Print_Full_New();
+                                        printer.setContent(contentText.getText());
+                                        printer.printf(filePath);
+                                    }
+                                }).start();
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
