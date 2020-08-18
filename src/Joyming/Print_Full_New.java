@@ -133,13 +133,19 @@ public class Print_Full_New {
                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
                         .format(System.currentTimeMillis()) + path + "  开始打印咯\n");
 
-                if (isRotate) {
-                    Doc doc = new SimpleDoc(getinputstream2(path), flavor, das);
-                    job.print(doc, pras);
-                } else {
-                    Doc doc = new SimpleDoc(getinputstream(path), flavor, das);
-                    job.print(doc, pras);
+                int angle = getRotateAngleForPhoto(path);
+
+                if (angle == 90 || angle == -90) {
+                    path = rotatePhonePhoto(path, angle);
                 }
+
+//                if (isRotate) {
+//                    Doc doc = new SimpleDoc(getinputstream2(path), flavor, das);
+//                    job.print(doc, pras);
+//                } else {
+                Doc doc = new SimpleDoc(getinputstream(path, angle), flavor, das);
+                job.print(doc, pras);
+//                }
 
 //                inputStream.close();
 
@@ -242,13 +248,11 @@ public class Print_Full_New {
     }
 
     /**
-     * 旋转 90 度
-     *
      * @param pathFileName
      * @return
      * @throws Exception
      */
-    public ByteArrayInputStream getinputstream(String pathFileName) throws Exception {
+    public ByteArrayInputStream getinputstream(String pathFileName, int angle) throws Exception {
 
         float scale = 1f;
         float a5Width = 210 * scale;
@@ -294,10 +298,11 @@ public class Print_Full_New {
         int fontHeight2 = fm2.getHeight();
 
 
-        float fontX = fontHeight + paddingTop + fontHeight2;
+//        float fontX = fontHeight + paddingTop + fontHeight2;
+        float fontX = paddingTop + fontHeight2;
         float fontY = (height - fontWidth) / 2;
 
-        float fontX2 = paddingTop + fontHeight2;
+        float fontX2 = paddingTop;
         float fontY2 = (height - fontWidth2) / 2;
 
 
@@ -312,48 +317,93 @@ public class Print_Full_New {
         BufferedImage image = read(new File(pathFileName));
 //        g.rotate(Math.toRadians(180), width / 2, height / 2);
 
-        int angle = 0;
-        Metadata metadata;
-        metadata = ImageMetadataReader.readMetadata(new File(pathFileName));
-        Directory directory = metadata.getDirectory(ExifDirectory.class);
-        if (directory.containsTag(ExifDirectory.TAG_ORIENTATION)) {
+//        int angle = 0;
+//        Metadata metadata;
+//        metadata = ImageMetadataReader.readMetadata(new File(pathFileName));
+//        Directory directory = metadata.getDirectory(ExifDirectory.class);
+//        if (directory.containsTag(ExifDirectory.TAG_ORIENTATION)) {
+//
+//            // Exif信息中方向　　
+//            int orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
+//
+//            System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+//                    .format(System.currentTimeMillis()) + " 照片的方向信息：" + orientation);
+//
+//            // 原图片的方向信息
+//            if (6 == orientation) {
+//                //6旋转90
+//                angle = 180;
+//            } else if (1 == orientation) {
+//                //1 顺时针旋转 90
+//                angle = 90;
+//            } else if (3 == orientation) {
+//                //1 逆时针旋转 90
+//                angle = -90;
+//            }
+//        }
+//
+//        int src_width = src.getWidth(null);
+//        int src_height = src.getHeight(null);
 
-            // Exif信息中方向　　
-            int orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
+//
+//        int src_width = src.getWidth(null);
+//        int src_height = src.getHeight(null);
+//
+//        int swidth = src_width;
+//        int sheight = src_height;
+//
+//        if (angle == 90 || angle == -90 || angle == 180) {
+//            swidth = src_height;
+//            sheight = src_width;
+//        }
+//
+//        Rectangle rect_des = new Rectangle(new Dimension(swidth, sheight));
+//
+//        BufferedImage res = new BufferedImage(rect_des.width, rect_des.height, BufferedImage.TYPE_INT_RGB);
+//        Graphics2D g2 = res.createGraphics();
+//
+//        g2.translate((rect_des.width - src_width) / 2,
+//                (rect_des.height - src_height) / 2);
+//        g2.rotate(Math.toRadians(angle), src_width / 2, src_height / 2);
 
-            System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
-                    .format(System.currentTimeMillis()) + " 照片的方向信息：" + orientation);
-
-            // 原图片的方向信息
-            if (6 == orientation) {
-                //6旋转90
-                angle = 180;
-            } else if (3 == orientation) {
-                //3旋转180
-                angle = 180;
-            }
-        }
-
-        int src_width = src.getWidth(null);
-        int src_height = src.getHeight(null);
-
-        Rectangle rect_des = new Rectangle(new Dimension(src_width, src_height));
-
-        g.translate((rect_des.width - src_width) / 2,
-                (rect_des.height - src_height) / 2);
-        g.rotate(Math.toRadians(angle), src_width / 2, src_height / 2);
 
         float x = fontX + fontHeight;
+        float y = fontX;
+        //画图
 
-        g.translate(0, 0);
+        if(angle == 180){
 
-        if (angle == 180) {
-            //画图
+            int src_width = src.getWidth(null);
+            int src_height = src.getHeight(null);
+
+            Rectangle rect_des = new Rectangle(new Dimension(src_width, src_height));
+
+            g.translate((rect_des.width - src_width) / 2,
+                    (rect_des.height - src_height) / 2);
+            g.rotate(Math.toRadians(angle), src_width / 2, src_height / 2);
+
+
             g.drawImage(image, 0, 0, (int) (width - x), height, null);
-        } else {
-            //画图
-            g.drawImage(image, (int) x, 0, width, height, null);
+
+        }else {
+            g.drawImage(image, (int) x, 0, (int) (width - x), height, null);
         }
+
+
+//        Rectangle rect_des = new Rectangle(new Dimension(src_width, src_height));
+//
+//        g.translate((rect_des.width - src_width) / 2,
+//                (rect_des.height - src_height) / 2);
+//        g.rotate(Math.toRadians(angle), src_width / 2, src_height / 2);
+//
+//        g.translate(0, 0);
+//
+//        //画第一行文字
+//        g.drawString(first, fontX, fontY);
+
+
+//        //画第二行文字
+//        g.drawString(second, fontX2, fontY2);
 
         // 图象生效
         g.dispose();
@@ -388,13 +438,13 @@ public class Print_Full_New {
             // 原图片的方向信息
             if (6 == orientation) {
                 //6旋转90
-                angle = 90;
+                angle = 180;
             } else if (3 == orientation) {
                 //3旋转180
-                angle = 180;
-            } else if (8 == orientation) {
+                angle = -90;
+            } else if (1 == orientation) {
                 //8旋转90
-                angle = 270;
+                angle = 90;
             }
         }
 
@@ -406,39 +456,32 @@ public class Print_Full_New {
      *
      * @return
      */
-    public static String rotatePhonePhoto(String fullPath, int angel) {
+    public static String rotatePhonePhoto(String fullPath, int angel) throws IOException {
 
-        BufferedImage src;
-        try {
-            src = ImageIO.read(new File(fullPath));
-            int src_width = src.getWidth(null);
-            int src_height = src.getHeight(null);
+        BufferedImage src = ImageIO.read(new File(fullPath));
+        int src_width = src.getWidth(null);
+        int src_height = src.getHeight(null);
 
-            int swidth = src_width;
-            int sheight = src_height;
+        int swidth = src_width;
+        int sheight = src_height;
 
-            if (angel == 90 || angel == 270) {
-                swidth = src_height;
-                sheight = src_width;
-            }
-
-            Rectangle rect_des = new Rectangle(new Dimension(swidth, sheight));
-
-            BufferedImage res = new BufferedImage(rect_des.width, rect_des.height, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2 = res.createGraphics();
-
-            g2.translate((rect_des.width - src_width) / 2,
-                    (rect_des.height - src_height) / 2);
-            g2.rotate(Math.toRadians(angel), src_width / 2, src_height / 2);
-
-            g2.drawImage(src, null, null);
-
-            ImageIO.write(res, "jpg", new File(fullPath));
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
+        if (angel == 90 || angel == -90 || angel == 180) {
+            swidth = src_height;
+            sheight = src_width;
         }
+
+        Rectangle rect_des = new Rectangle(new Dimension(swidth, sheight));
+
+        BufferedImage res = new BufferedImage(rect_des.width, rect_des.height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = res.createGraphics();
+
+        g2.translate((rect_des.width - src_width) / 2,
+                (rect_des.height - src_height) / 2);
+        g2.rotate(Math.toRadians(angel), src_width / 2, src_height / 2);
+
+        g2.drawImage(src, null, null);
+
+        ImageIO.write(res, "jpg", new File(fullPath));
 
         return fullPath;
 
