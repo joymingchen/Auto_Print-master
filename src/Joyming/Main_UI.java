@@ -1,5 +1,12 @@
 package Joyming;
 
+import javax.print.DocFlavor;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.attribute.standard.OrientationRequested;
+import javax.print.attribute.standard.PrintQuality;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,6 +25,7 @@ public class Main_UI extends JFrame {
 
     private JPanel jPaneln1;
     private JPanel jPaneln2;
+    private JPanel jPaneln3;
     private JPanel jPanelc1;
     private JPanel jPanelc2;
     private JPanel jPanelb1;
@@ -35,12 +43,15 @@ public class Main_UI extends JFrame {
     private JLabel contentLabel;
     private JTextField contentText;
 
+    private JLabel printServiceLabel;
+
     private JButton printHalf;
 
     private JButton printFour;
 
     private JButton clearAll;
     private JButton test;
+    private JButton test2;
     private JButton fileWatcherBtn;
     private JButton cancelfileWatcher;
     private JTextArea tips;
@@ -70,6 +81,7 @@ public class Main_UI extends JFrame {
 
 //            jPanelSouth = new JPanel();
             jPaneln1 = new JPanel();
+            jPaneln3 = new JPanel();
             jPanelc1 = new JPanel();
 
             jPanelc2 = new JPanel();
@@ -97,16 +109,24 @@ public class Main_UI extends JFrame {
 
             jPaneln1.add(contentLabel);
             jPaneln1.add(contentText);
-//            jPaneln1.add(printFour);
+        }
+        {
+            //定位默认的打印服务
+            PrintService defaultService = PrintServiceLookup.lookupDefaultPrintService();
+            printServiceLabel = new JLabel("默认打印机： " + defaultService);
 
+            jPaneln3.add(printServiceLabel);
         }
         {
             clearAll = new JButton("清空记录");
             test = new JButton("手动执行打印");
+            test2 = new JButton("旋转180度打印");
+
             fileWatcherBtn = new JButton("文件夹监听");
             cancelfileWatcher = new JButton("取消监听");
             jPaneln2.add(clearAll);
             jPaneln2.add(test);
+//            jPaneln2.add(test2);
             jPaneln2.add(fileWatcherBtn);
             jPaneln2.add(cancelfileWatcher);
         }
@@ -148,10 +168,10 @@ public class Main_UI extends JFrame {
             this.add(jPanelCenter, BorderLayout.CENTER);
             this.add(jPanelBottom, BorderLayout.SOUTH);
 
-
             jPanelCenter.setLayout(new BorderLayout());
             jPanelCenter.add(jPaneln1, BorderLayout.NORTH);
-            jPanelCenter.add(jPanelc1, BorderLayout.CENTER);
+            jPanelCenter.add(jPaneln3,BorderLayout.CENTER);
+            jPanelCenter.add(jPanelc1, BorderLayout.SOUTH);
 
             jPanelc1.setLayout(new BorderLayout());
             jPanelc1.add(jPaneln2, BorderLayout.NORTH);
@@ -167,7 +187,7 @@ public class Main_UI extends JFrame {
             this.setVisible(true);
 //            this.setContentPane(jPanel);
 //            this.add(jPanel);
-            this.setSize(560, 520);
+            this.setSize(560, 500);
             // 屏幕居中
             int windowWidth = this.getWidth(); // 获得窗口宽
             int windowHeight = this.getHeight(); // 获得窗口高
@@ -232,10 +252,31 @@ public class Main_UI extends JFrame {
                         if (printer == null) {
                             printer = new Print_Full_New();
                         }
+                        printer.setRotate(false);
                         printer.setContent(contentText.getText());
                         printer.doPrintfJob(fileText.getText());
                     }
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                            .format(System.currentTimeMillis()) + "！！！" + e.getMessage());
+                }
+            }
+        });
+
+        test2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    boolean a = printerJob.printDialog();
+                    if (a) {
+                        printer = new Print_Full_New();
+
+                        printer.setRotate(true);
+                        printer.setContent(contentText.getText());
+                        printer.doPrintfJob(fileText.getText());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")

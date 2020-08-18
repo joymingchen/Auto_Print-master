@@ -1,11 +1,20 @@
 package Joyming;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.imaging.jpeg.JpegProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifDirectory;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.print.*;
+import javax.print.attribute.Attribute;
 import javax.print.attribute.DocAttributeSet;
 import javax.print.attribute.HashDocAttributeSet;
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -39,6 +48,8 @@ public class Print_Full_New {
      * 自定义文字内容
      */
     private String content = "";
+
+    private boolean isRotate = false;
 
     public Print_Full_New() {
         long timeMillis = System.currentTimeMillis();
@@ -82,6 +93,8 @@ public class Print_Full_New {
         HashPrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
         //A5横向打印
         pras.add(MediaSizeName.ISO_A5);
+        pras.add(PrintQuality.HIGH);
+        pras.add(OrientationRequested.LANDSCAPE);
 
         //设置打印格式，因为未确定类型，所以选择autosense
         DocFlavor flavor = DocFlavor.INPUT_STREAM.JPEG;
@@ -118,15 +131,20 @@ public class Print_Full_New {
 
 //                ByteArrayInputStream inputStream = getinputstream(path);
                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
-                        .format(System.currentTimeMillis()) + path + "\n开始打印咯\n");
+                        .format(System.currentTimeMillis()) + path + "  开始打印咯\n");
 
-                Doc doc = new SimpleDoc(getinputstream(path), flavor, das);
-                job.print(doc, pras);
+                if (isRotate) {
+                    Doc doc = new SimpleDoc(getinputstream2(path), flavor, das);
+                    job.print(doc, pras);
+                } else {
+                    Doc doc = new SimpleDoc(getinputstream(path), flavor, das);
+                    job.print(doc, pras);
+                }
 
 //                inputStream.close();
 
                 System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
-                        .format(System.currentTimeMillis()) + path + "\n打印结束咯\n");
+                        .format(System.currentTimeMillis()) + path + "  打印结束咯\n");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -139,8 +157,14 @@ public class Print_Full_New {
         }
     }
 
-
-    public ByteArrayInputStream getinputstream(String pathFileName) throws Exception {
+    /**
+     * 旋转 90 度
+     *
+     * @param pathFileName
+     * @return
+     * @throws Exception
+     */
+    public ByteArrayInputStream getinputstream2(String pathFileName) throws Exception {
 
         float scale = 1f;
         float a5Width = 210 * scale;
@@ -217,12 +241,224 @@ public class Print_Full_New {
         return input;
     }
 
+    /**
+     * 旋转 90 度
+     *
+     * @param pathFileName
+     * @return
+     * @throws Exception
+     */
+    public ByteArrayInputStream getinputstream(String pathFileName) throws Exception {
+
+        float scale = 1f;
+        float a5Width = 210 * scale;
+        float a5Height = 148 * scale;
+
+        // 在内存中创建图象
+        int width = (int) (a5Width * 18), height = (int) (a5Height * 16);
+
+        BufferedImage src = new BufferedImage(width, height,
+                BufferedImage.TYPE_INT_RGB);
+
+        // 获取图形上下文
+        Graphics2D g = (Graphics2D) src.getGraphics();
+
+        // 设定背景色
+        g.setColor(new Color(255, 255, 255));
+        g.fillRect(0, 0, width, height);
+
+        g.translate(0, 0);
+
+
+        // 设定字体
+        g.setColor(Color.RED);
+        //旋转字体
+        Font font = new Font("宋体", Font.BOLD, 100);
+        AffineTransform affineTransform = new AffineTransform();
+        affineTransform.rotate(Math.toRadians(90), 0, 0);
+        Font rotatedFont = font.deriveFont(affineTransform);
+        g.setFont(rotatedFont);
+
+        //第一行文字
+        String first = new SimpleDateFormat("yyyy.MM.dd   HH:mm").format(System.currentTimeMillis());
+        FontMetrics fm = g.getFontMetrics(font);
+        int fontWidth = fm.stringWidth(first);
+        int fontHeight = fm.getHeight();
+
+        //第二行文字
+        //间距
+        int paddingTop = 20;
+        String second = content;
+        FontMetrics fm2 = g.getFontMetrics(font);
+        int fontWidth2 = fm2.stringWidth(second);
+        int fontHeight2 = fm2.getHeight();
+
+
+        float fontX = fontHeight + paddingTop + fontHeight2;
+        float fontY = (height - fontWidth) / 2;
+
+        float fontX2 = paddingTop + fontHeight2;
+        float fontY2 = (height - fontWidth2) / 2;
+
+
+        //画第一行文字
+        g.drawString(first, fontX, fontY);
+
+        //画第二行文字
+        g.drawString(second, fontX2, fontY2);
+
+
+        //画照片
+        BufferedImage image = read(new File(pathFileName));
+//        g.rotate(Math.toRadians(180), width / 2, height / 2);
+
+        int angle = 0;
+        Metadata metadata;
+        metadata = ImageMetadataReader.readMetadata(new File(pathFileName));
+        Directory directory = metadata.getDirectory(ExifDirectory.class);
+        if (directory.containsTag(ExifDirectory.TAG_ORIENTATION)) {
+
+            // Exif信息中方向　　
+            int orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
+
+            System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                    .format(System.currentTimeMillis()) + " 照片的方向信息：" + orientation);
+
+            // 原图片的方向信息
+            if (6 == orientation) {
+                //6旋转90
+                angle = 180;
+            } else if (3 == orientation) {
+                //3旋转180
+                angle = 180;
+            }
+        }
+
+        int src_width = src.getWidth(null);
+        int src_height = src.getHeight(null);
+
+        Rectangle rect_des = new Rectangle(new Dimension(src_width, src_height));
+
+        g.translate((rect_des.width - src_width) / 2,
+                (rect_des.height - src_height) / 2);
+        g.rotate(Math.toRadians(angle), src_width / 2, src_height / 2);
+
+        float x = fontX + fontHeight;
+
+        g.translate(0, 0);
+
+        if (angle == 180) {
+            //画图
+            g.drawImage(image, 0, 0, (int) (width - x), height, null);
+        } else {
+            //画图
+            g.drawImage(image, (int) x, 0, width, height, null);
+        }
+
+        // 图象生效
+        g.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ImageOutputStream imageOut = ImageIO.createImageOutputStream(output);
+        ImageIO.write(src, "JPEG", imageOut);
+        imageOut.close();
+        ByteArrayInputStream input = new ByteArrayInputStream(
+                output.toByteArray());
+        return input;
+    }
+
+    /**
+     * 获取图片正确显示需要旋转的角度（顺时针）
+     *
+     * @return
+     */
+    public static int getRotateAngleForPhoto(String filePath) throws ImageProcessingException, MetadataException {
+        File file = new File(filePath);
+        int angle = 0;
+        Metadata metadata;
+        metadata = ImageMetadataReader.readMetadata(file);
+        Directory directory = metadata.getDirectory(ExifDirectory.class);
+        if (directory.containsTag(ExifDirectory.TAG_ORIENTATION)) {
+
+            // Exif信息中方向　　
+            int orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
+
+            System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ：")
+                    .format(System.currentTimeMillis()) + " 照片的方向信息：" + orientation);
+
+            // 原图片的方向信息
+            if (6 == orientation) {
+                //6旋转90
+                angle = 90;
+            } else if (3 == orientation) {
+                //3旋转180
+                angle = 180;
+            } else if (8 == orientation) {
+                //8旋转90
+                angle = 270;
+            }
+        }
+
+        return angle;
+    }
+
+    /**
+     * 旋转照片
+     *
+     * @return
+     */
+    public static String rotatePhonePhoto(String fullPath, int angel) {
+
+        BufferedImage src;
+        try {
+            src = ImageIO.read(new File(fullPath));
+            int src_width = src.getWidth(null);
+            int src_height = src.getHeight(null);
+
+            int swidth = src_width;
+            int sheight = src_height;
+
+            if (angel == 90 || angel == 270) {
+                swidth = src_height;
+                sheight = src_width;
+            }
+
+            Rectangle rect_des = new Rectangle(new Dimension(swidth, sheight));
+
+            BufferedImage res = new BufferedImage(rect_des.width, rect_des.height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = res.createGraphics();
+
+            g2.translate((rect_des.width - src_width) / 2,
+                    (rect_des.height - src_height) / 2);
+            g2.rotate(Math.toRadians(angel), src_width / 2, src_height / 2);
+
+            g2.drawImage(src, null, null);
+
+            ImageIO.write(res, "jpg", new File(fullPath));
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+
+        return fullPath;
+
+    }
+
+
     public String getContent() {
         return content;
     }
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public boolean isRotate() {
+        return isRotate;
+    }
+
+    public void setRotate(boolean rotate) {
+        isRotate = rotate;
     }
 }
 

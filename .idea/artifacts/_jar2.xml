@@ -6,6 +6,8 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/pdfbox-2.0.8.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/fontbox-2.0.17.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-logging-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/metadata-extractor-2.4.0-beta-1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/mediautil-1.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
