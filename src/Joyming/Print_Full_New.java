@@ -284,7 +284,7 @@ public class Print_Full_New {
         g.setFont(rotatedFont);
 
         //第一行文字
-        String first = new SimpleDateFormat("yyyy.MM.dd   HH:mm").format(System.currentTimeMillis());
+        String first = content;
         FontMetrics fm = g.getFontMetrics(font);
         int fontWidth = fm.stringWidth(first);
         int fontHeight = fm.getHeight();
@@ -292,7 +292,7 @@ public class Print_Full_New {
         //第二行文字
         //间距
         int paddingTop = 20;
-        String second = content;
+        String second = new SimpleDateFormat("yyyy.MM.dd   HH:mm").format(System.currentTimeMillis());
         FontMetrics fm2 = g.getFontMetrics(font);
         int fontWidth2 = fm2.stringWidth(second);
         int fontHeight2 = fm2.getHeight();
@@ -428,7 +428,6 @@ public class Print_Full_New {
         metadata = ImageMetadataReader.readMetadata(file);
         Directory directory = metadata.getDirectory(ExifDirectory.class);
         if (directory.containsTag(ExifDirectory.TAG_ORIENTATION)) {
-
             // Exif信息中方向　　
             int orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
 
